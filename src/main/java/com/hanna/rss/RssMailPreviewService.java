@@ -10,9 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,12 +40,10 @@ public class RssMailPreviewService {
             "</body>\n" +
         "</html>";
 
-    //private final RssEmailsRepository rssEmailsRepository;
+    private final RssEmailsRepository rssEmailsRepository;
 
     public String prepareRssMailHtmlPreview(String email) {
-        //RssEmails rssEmails = rssEmailsRepository.findRssEmailsByEmail(email);
-        RssEmails rssEmails = new RssEmails();
-        rssEmails.rssUrls = Arrays.asList("https://tvn24.pl/najnowsze.xml");
+        RssEmails rssEmails = rssEmailsRepository.findRssEmailsByEmail(email);
 
         String blocks = rssEmails.rssUrls.stream()
             .map(this::fetchRecentFeed)

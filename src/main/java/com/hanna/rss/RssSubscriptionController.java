@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.*;
 public class RssSubscriptionController {
 
     private final RssMailPreviewService rssMailPreviewService;
+    private final RssEmailsRepository rssEmailsRepository;
 
     @PostMapping("/rss")
     public ResponseEntity saveRssUrls(
-        @RequestBody EmailRssUrls emailRssUrls
+        @RequestBody RssEmails emailRssUrls
     ) {
+        rssEmailsRepository.insert(emailRssUrls);
         return ResponseEntity.ok().build();
     }
 
