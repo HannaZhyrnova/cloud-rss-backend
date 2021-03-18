@@ -15,11 +15,11 @@ import java.util.List;
 @Document(collection = "rssEmails")
 public class RssEmails {
     @Id
-    String id;
+    private String id;
 
     @Field("email")
-    String email;
+    private String email;
 
     @Field("rssUrls")
-    List<String> rssUrls;
+    private List<String> rssUrls;
 }

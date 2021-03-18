@@ -1,5 +1,6 @@
 package com.hanna.rss;
 
+import com.sendgrid.*;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RssMailPreviewService {
+public class RssMailService {
 
     private static final String HTML_EMAIL_TEMPLATE_RSS = "<div>\n" +
         "            <h2>{title}</h2>\n" +
@@ -42,10 +43,37 @@ public class RssMailPreviewService {
 
     private final RssEmailsRepository rssEmailsRepository;
 
+    public void sendRssMail(String email) {
+        String htmlEmailContent = prepareRssMailHtmlPreview(email);
+        sendEmail(email, htmlEmailContent);
+    }
+
+    @SneakyThrows
+    public void sendEmail(String toEmail, String emailContent) {
+        Email from = new Email("hanna.zhyrnova@gmail.com");
+        String subject = "RSS Feed updates";
+        Email to = new Email(toEmail);
+        Content content = new Content("text/html", emailContent);
+        Mail mail = new Mail(from, subject, to, content);
+
+        String sendGridApiKey = System.getenv("SENDGRID_API_KEY");
+        SendGrid sg = new SendGrid(sendGridApiKey);
+        Request request = new Request();
+
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(mail.build());
+        Response response = sg.api(request);
+
+        System.out.println(response.getStatusCode());
+        System.out.println(response.getBody());
+        System.out.println(response.getHeaders());
+    }
+
     public String prepareRssMailHtmlPreview(String email) {
         RssEmails rssEmails = rssEmailsRepository.findRssEmailsByEmail(email);
 
-        String blocks = rssEmails.rssUrls.stream()
+        String blocks = rssEmails.getRssUrls().stream()
             .map(this::fetchRecentFeed)
             .flatMap(feed -> (Stream<SyndEntry>)feed.getEntries().stream())
             .map(this::toHTMLBlock)
